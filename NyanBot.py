@@ -16,6 +16,7 @@ user = discord.User()
 message = discord.Message()
 directory = None
 searchcatch = None
+searchapproved = None
 log_file = None
 girl_names = ["rin", "hanayo", "maki", "honoka", "umi", "kotori", "eri", "nozomi", "nico"]
 nyansponses = ["Nyan?", "にゃん!", "(✿◠‿◠)〜 ITSUDEMOO (✿◠‿◠)〜", "Nyaa~", "(✿◠‿◠)〜 いつでも (✿◠‿◠)〜"]
@@ -57,6 +58,8 @@ async def on_message(message):
                         if (result != ""):
                             msg = message.author.mention + " " + msg
                             await client.send_file(message.channel, result, content=msg)
+                        else:
+                            await client.send_message(message.channel, msg)
                     else:
                         msg = "```Usage: ]nyan search <term>\n\tTerm may only be alphabetical!\n\tPlease don't try to break me-nyaa~```"
                         await client.send_message(message.channel, msg)
@@ -69,16 +72,21 @@ async def on_message(message):
                         if (result != ""):
                             msg = message.author.mention + " " + msg
                             await client.send_file(message.channel, result, content=msg)
+                        else:
+                            await client.send_message(message.channel, msg)
                     else:
                         msg = "```Usage: ]nyan dank <term>\n\tTerm may only be alphabetical!\n\tPlease don't try to break me-nyaa~```"
                         await client.send_message(message.channel, msg)
+                elif currentMessage[1] == "id":
+                    msg = "{} Here you are-nyan!".format(message.author.id)
+                    await client.send_message(message.channel, msg)
                     
     except Exception as ex:
         await write_log("ERROR: " + str(ex))
 
 async def search(directory, searchTerm, callerId):
     
-    if (callerId != client.user.id): # ""
+    if (callerId in searchapproved): # ""
         result = ""
         msg = ""
         searchResults = []
@@ -101,6 +109,7 @@ async def search(directory, searchTerm, callerId):
     else:
         result = ""
         msg = "```For the sake of bandwidth, NyanBot's search features\nare only available for Seph-nyan. Please contact Seph-nyan\nif you would like to make use of these features.```"
+        await write_log("Search from {} rejected.".format(callerId))
     return result, msg
         
 #client.change_status(game=discord.Game(name="your custom game here"))
@@ -124,10 +133,12 @@ if __name__ == "__main__":
     global directory
     global dankrectory
     global searchcatch
+    global searchapproved
     
     docs = open("NyanConfig.txt")
     ConfigDic = json.load(docs)
     directory = ConfigDic["directory"]
     dankrectory = ConfigDic["dankrectory"]
     searchcatch = ConfigDic["catch"]
+    searchapproved = ConfigDic["searchapproved"]
     client.run(ConfigDic["username"], ConfigDic["password"])

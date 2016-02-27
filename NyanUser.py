@@ -18,7 +18,9 @@ class NyanUser:
             threading.Timer(600.0, self.DecrementSearches).start()
     
     def DecrementSearches(self):
-        if (self.searches > 0):
+        # We don't want to decrement if they've spammed so much that they're
+        # temporarily blocked.
+        if (self.searches > 0 and self.searches < 8):
             self.searches -= 1
     
     def ResetSearches(self):

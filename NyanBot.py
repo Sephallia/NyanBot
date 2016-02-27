@@ -97,7 +97,7 @@ async def search(directory, searchTerm, callerId):
         else:
             msg = "Could not find '{}'. Nyanbot is sorry nyan~".format(searchTerm)
             await write_log("NOTHING FOUND")
-            return os.path.join(directory, catch), msg
+            return os.path.join(directory, searchcatch), msg
     else:
         result = ""
         msg = "```For the sake of bandwidth, NyanBot's search features\nare only available for Seph-nyan. Please contact Seph-nyan\nif you would like to make use of these features.```"

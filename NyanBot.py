@@ -15,6 +15,7 @@ client = discord.Client()
 user = discord.User()
 message = discord.Message()
 directory = None
+searchcatch = None
 log_file = None
 girl_names = ["rin", "hanayo", "maki", "honoka", "umi", "kotori", "eri", "nozomi", "nico"]
 nyansponses = ["Nyan?", "にゃん!", "(✿◠‿◠)〜 ITSUDEMOO (✿◠‿◠)〜", "Nyaa~", "(✿◠‿◠)〜 いつでも (✿◠‿◠)〜"]
@@ -56,8 +57,6 @@ async def on_message(message):
                         if (result != ""):
                             msg = message.author.mention + " " + msg
                             await client.send_file(message.channel, result, content=msg)
-                        else:
-                            await client.send_message(message.channel, msg)
                     else:
                         msg = "```Usage: ]nyan search <term>\n\tTerm may only be alphabetical!\n\tPlease don't try to break me-nyaa~```"
                         await client.send_message(message.channel, msg)
@@ -70,8 +69,6 @@ async def on_message(message):
                         if (result != ""):
                             msg = message.author.mention + " " + msg
                             await client.send_file(message.channel, result, content=msg)
-                        else:
-                            await client.send_message(message.channel, msg)
                     else:
                         msg = "```Usage: ]nyan dank <term>\n\tTerm may only be alphabetical!\n\tPlease don't try to break me-nyaa~```"
                         await client.send_message(message.channel, msg)
@@ -81,7 +78,7 @@ async def on_message(message):
 
 async def search(directory, searchTerm, callerId):
     
-    if (callerId == client.user.id):
+    if (callerId != client.user.id): # ""
         result = ""
         msg = ""
         searchResults = []
@@ -100,7 +97,7 @@ async def search(directory, searchTerm, callerId):
         else:
             msg = "Could not find '{}'. Nyanbot is sorry nyan~".format(searchTerm)
             await write_log("NOTHING FOUND")
-            return "", msg
+            return os.path.join(directory, catch), msg
     else:
         result = ""
         msg = "```For the sake of bandwidth, NyanBot's search features\nare only available for Seph-nyan. Please contact Seph-nyan\nif you would like to make use of these features.```"
@@ -126,9 +123,11 @@ async def on_ready():
 if __name__ == "__main__":
     global directory
     global dankrectory
+    global searchcatch
     
     docs = open("NyanConfig.txt")
     ConfigDic = json.load(docs)
     directory = ConfigDic["directory"]
     dankrectory = ConfigDic["dankrectory"]
+    searchcatch = ConfigDic["catch"]
     client.run(ConfigDic["username"], ConfigDic["password"])

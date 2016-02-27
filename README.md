@@ -16,8 +16,11 @@ The program relies on NyanConfig.txt existing in the same directory. NyanConfig.
     "password": "discord_password",
     "directory": "/directory/to/fanart",
     "dankrectory": "/directory/to/dank"
+    "catch": "catch file name.extension"
 }
 ```
+Catch file should be in "directory" and will be used as "consolation" if the search returns no results.
+
 Perhaps this should be made more clear somehow, but...
 ```
 ]nyan search will look in "directory"

@@ -1,6 +1,6 @@
-#A bot for Discord based on the (unofficial) Discord Python API.
+# NyanBot
 
-A Discord server I frequent is big on Fanart. As a result, I thought it'd be cool to have a bot that searched through my Fanart folder based on a specific keyword and uploaded a random piece of fanart that I've saved.
+A bot for Discord based on the (unofficial) Discord Python API. A Discord server I frequent is big on Fanart. As a result, I thought it'd be cool to have a bot that searched through my Fanart folder based on a specific keyword and uploaded a random piece of fanart that I've saved.
 
 ##Restriction
 You must have your folders and files sorted and named appropriately for your task. 

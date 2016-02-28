@@ -5,19 +5,17 @@
 from datetime import datetime
 from random import randint
 from NyanUser import NyanUser
+from NyanUtil import NyanUtil
 import discord
 import os, os.path
 import json
 import requests
-import aiohttp
 import asyncio
 
 client = discord.Client()
 user = discord.User()
 message = discord.Message()
 UserDic = {}
-ConfigDic = None
-log_file = None
 girl_names = ["rin", "hanayo", "maki", "honoka", "umi", "kotori", "eri", "nozomi", "nico"]
 nyansponses = ["Nyan?", "にゃん!", "(✿◠‿◠)〜 ITSUDEMOO (✿◠‿◠)〜", "Nyaa~", "(✿◠‿◠)〜 いつでも (✿◠‿◠)〜"]
 
@@ -35,7 +33,7 @@ async def on_message(message):
             return
         
         if currentMessage.startswith("]nyan"):
-            await write_log("{} CALLED: {}".format(clean_username(message.author.name), currentMessage))
+            await NyanUtil.write_log("{} CALLED: {}".format(clean_username(message.author.name), currentMessage))
             currentMessage = currentMessage.split(" ")
             if len(currentMessage) == 1:
                 await send_wrapper(message.channel, nyansponses[randint(0, len(nyansponses)-1)])
@@ -44,7 +42,7 @@ async def on_message(message):
                     if len(currentMessage) == 3 and str.isalpha(currentMessage[2]):
                         searchTerm = currentMessage[2].lower()
                         
-                        filename, msg = await search(ConfigDic["directory"], searchTerm, message.author.id)
+                        filename, msg = await search(NyanUtil.ConfigDic["directory"], searchTerm, message.author.id)
                         if (filename != ""):
                             msg = message.author.mention + " " + msg
                             await send_wrapper(message.channel, msg, file=filename)
@@ -58,7 +56,7 @@ async def on_message(message):
                     if len(currentMessage) == 3 and str.isalpha(currentMessage[2]):
                         searchTerm = currentMessage[2].lower()
                         
-                        filename, msg = await search(ConfigDic["dankrectory"], searchTerm, message.author.id)
+                        filename, msg = await search(NyanUtil.ConfigDic["dankrectory"], searchTerm, message.author.id)
                         if (filename != ""):
                             msg = message.author.mention + " " + msg
                             await send_wrapper(message.channel, msg, file=filename)
@@ -69,9 +67,9 @@ async def on_message(message):
                         await send_wrapper(message.channel, msg)
                     
         elif currentMessage.startswith("+nyan"):
-            await write_log("{} CALLED: {}".format(clean_username(message.author.name), currentMessage))
+            await NyanUtil.write_log("{} CALLED: {}".format(clean_username(message.author.name), currentMessage))
             currentMessage = currentMessage.split(" ")
-            if str(message.author.id) in ConfigDic["admin"]:
+            if str(message.author.id) in NyanUtil.ConfigDic["admin"]:
                 if currentMessage[1] == "todo":
                     msg = "Seph-nyan should figure out what to do!" 
                     await send_wrapper(message.channel, msg)
@@ -102,23 +100,23 @@ async def on_message(message):
             await send_wrapper(message.channel, msg)
         
     except Exception as ex:
-        await write_log("ERROR: " + str(ex))
+        await NyanUtil.write_log("ERROR: " + str(ex))
 
 async def send_wrapper(channel, msg, file=None):
-    if str(channel).startswith("Direct Message") or channel.id in ConfigDic["channelsapproved"]:
+    if str(channel).startswith("Direct Message") or channel.id in NyanUtil.ConfigDic["channelsapproved"]:
         if file == None:
             await client.send_message(channel, msg)
         else:
             await client.send_file(channel, file, content=msg)
     else:
-        await write_log("{} is not an approved channel.".format(channel.id))
+        await NyanUtil.write_log("{} is not an approved channel.".format(channel.id))
         
 async def search(directory, searchTerm, callerId):
     if (callerId not in UserDic):
         UserDic[callerId] = NyanUser(callerId)
 
     # WIP / TODO currently disabled
-    if (not UserDic[callerId].banned) and (UserDic[callerId].searches < 8) : # callerId not in ConfigDic["searchbanned"]
+    if (not UserDic[callerId].banned) and (UserDic[callerId].searches < 8) : 
         UserDic[callerId].PerformedSearch()
         result = ""
         msg = ""
@@ -133,38 +131,25 @@ async def search(directory, searchTerm, callerId):
                     searchResults.append(os.path.join(root, f))
         if len(searchResults) > 0:
             msg = "Found something! Are you pleased with NyanBot-nya?"
-            await write_log("FOUND!")
+            await NyanUtil.write_log("FOUND!")
             return searchResults[randint(0, len(searchResults)-1)], msg
         else:
             msg = "Could not find '{}'. Nyanbot is sorry nyan~".format(searchTerm)
-            await write_log("NOTHING FOUND")
-            return os.path.join(directory, ConfigDic["catch"]), msg
+            await NyanUtil.write_log("NOTHING FOUND")
+            return os.path.join(directory, NyanUtil.ConfigDic["catch"]), msg
     else:
         result = ""
         msg = "For the sake of bandwidth, you have been restricted from using this feature. Give NyanBot around an hour-nyaa~ If the problem persists after, perhaps you've been banned. Nyahaha~"
-        await write_log("Search from {} rejected.".format(callerId))
+        await NyanUtil.write_log("Search from {} rejected.".format(callerId))
     return result, msg
         
-#client.change_status(game=discord.Game(name="your custom game here"))
-async def write_log(msg):
-    global log_file
-    if (log_file == None):
-        log_file = open("log.txt", "a+")
-        log_file.write("\n> " + str(datetime.now()) +"\n")
-    log_file.write("\t(" + msg + ")\n")
-    log_file.flush()
-    
-def write_config():
-    with open("NyanConfig.txt", "w+") as docs:
-        json.dump(data, docs)
-    
 @client.event
 async def on_ready():
-    await write_log("Logged in as")
-    await write_log(clean_username(client.user.name))
-    await write_log(client.user.id)
-    await write_log("Looking in dir: " + ConfigDic["directory"])
-    await write_log("Dank in dir: " + ConfigDic["dankrectory"])
+    await NyanUtil.write_log("Logged in as")
+    await NyanUtil.write_log(clean_username(client.user.name))
+    await NyanUtil.write_log(client.user.id)
+    await NyanUtil.write_log("Looking in dir: " + NyanUtil.ConfigDic["directory"])
+    await NyanUtil.write_log("Dank in dir: " + NyanUtil.ConfigDic["dankrectory"])
     
 def clean_username(msg):
     retmsg = ""
@@ -174,8 +159,5 @@ def clean_username(msg):
     return retmsg
     
 if __name__ == "__main__":
-    global ConfigDic
-    
-    with open("NyanConfig.txt", "r") as docs:
-        ConfigDic = json.load(docs)
-        client.run(ConfigDic["username"], ConfigDic["password"])
+    NyanUtil.load_dic()
+    client.run(NyanUtil.ConfigDic["username"], NyanUtil.ConfigDic["password"])

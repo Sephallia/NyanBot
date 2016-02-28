@@ -33,7 +33,7 @@ async def on_message(message):
             return
         
         if currentMessage.startswith("]nyan"):
-            await NyanUtil.write_log("{} CALLED: {}".format(clean_username(message.author.name), currentMessage))
+            await NyanUtil.write_log("{} CALLED: {}".format(NyanUtil.clean_username(message.author.name), currentMessage))
             currentMessage = currentMessage.split(" ")
             if len(currentMessage) == 1:
                 await send_wrapper(message.channel, nyansponses[randint(0, len(nyansponses)-1)])
@@ -67,7 +67,7 @@ async def on_message(message):
                         await send_wrapper(message.channel, msg)
                     
         elif currentMessage.startswith("+nyan"):
-            await NyanUtil.write_log("{} CALLED: {}".format(clean_username(message.author.name), currentMessage))
+            await NyanUtil.write_log("{} CALLED: {}".format(NyanUtil.clean_username(message.author.name), currentMessage))
             currentMessage = currentMessage.split(" ")
             if str(message.author.id) in NyanUtil.ConfigDic["admin"]:
                 if currentMessage[1] == "todo":
@@ -95,6 +95,13 @@ async def on_message(message):
                         UserDic[mentionedUser.id].banned = False
                         msg = "{} has been unbanned-nyan!".format(mentionedUser.name)
                         await send_wrapper(message.channel, msg)
+                elif currentMessage[1] == "AddChannel":
+                    await NyanUtil.add_channel(message.channel.id)
+                    msg = "NyanBot can now post in {}! Hello everyone nyaa~".format(message.channel.name)
+                    await send_wrapper(message.channel, msg)
+                elif currentMessage[1] == "RemoveChannel":
+                    await NyanUtil.remove_channel(message.channel.id)
+                
         elif currentMessage.startswith("]にゃん"):
             msg = "日本語で何のつもりですかい？！"
             await send_wrapper(message.channel, msg)
@@ -103,7 +110,7 @@ async def on_message(message):
         await NyanUtil.write_log("ERROR: " + str(ex))
 
 async def send_wrapper(channel, msg, file=None):
-    if str(channel).startswith("Direct Message") or channel.id in NyanUtil.ConfigDic["channelsapproved"]:
+    if str(channel).startswith("Direct Message") or channel.id in NyanUtil.ConfigDic["approvedchannels"]:
         if file == None:
             await client.send_message(channel, msg)
         else:
@@ -146,17 +153,10 @@ async def search(directory, searchTerm, callerId):
 @client.event
 async def on_ready():
     await NyanUtil.write_log("Logged in as")
-    await NyanUtil.write_log(clean_username(client.user.name))
+    await NyanUtil.write_log(NyanUtil.clean_username(client.user.name))
     await NyanUtil.write_log(client.user.id)
     await NyanUtil.write_log("Looking in dir: " + NyanUtil.ConfigDic["directory"])
     await NyanUtil.write_log("Dank in dir: " + NyanUtil.ConfigDic["dankrectory"])
-    
-def clean_username(msg):
-    retmsg = ""
-    for char in msg:
-        if char.isalpha():
-            retmsg += char
-    return retmsg
     
 if __name__ == "__main__":
     NyanUtil.load_dic()
